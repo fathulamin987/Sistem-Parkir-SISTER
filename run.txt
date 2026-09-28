@@ -1,0 +1,46 @@
+Jalankan menggunakan 4 device menggunakan ini :
+ALUR MENJALANKAN SISTEM PARKIR RPC - 4 DEVICE
+
+1. Semua device terhubung ke Wi-Fi yang sama.
+
+2. DEVICE 1
+   - Jalankan server:
+     python server_parkir.py
+   - Cek IP server dengan:
+     ipconfig
+   - Misalnya IP: 192.168.1.10
+   - Jalankan:
+     python client_1_masuk.py
+
+3. DEVICE 2
+   - Ubah IP_SERVER menjadi IP Device 1.
+   - Jalankan:
+     python client_2_keluar.py
+
+4. DEVICE 3
+   - Ubah IP_SERVER menjadi IP Device 1.
+   - Jalankan:
+     python client_3_petugas.py
+
+5. DEVICE 4
+   - Ubah IP_SERVER menjadi IP Device 1.
+   - Jalankan:
+     python client_4_manajer.py
+
+URUTAN DEMO:
+
+Kendaraan masuk
+→ Server menyimpan data
+→ Petugas melihat slot terisi
+→ Kendaraan keluar
+→ Server mengosongkan slot
+→ Manajer melihat transaksi dan pendapatan
+
+Catatan:
+Server harus tetap berjalan selama semua client digunakan.
+Semua client menggunakan IP Server yang sama.
+
+
+
+Jalankan menggunakan 1 device menggunakan ini :
+IP_SERVER = "localhost"
