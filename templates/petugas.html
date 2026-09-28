@@ -2,17 +2,12 @@
 <html lang="id">
 
 <head>
-
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Petugas Parkir</title>
+    <title>Monitoring Parkir</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
-
 </head>
 
 <body>
@@ -20,66 +15,23 @@
 <div class="container wide">
 
     <div class="header">
-
         <h1>Sistem Parkir</h1>
-
         <p>Monitoring Petugas</p>
-
     </div>
-
-
-    <div class="stats">
-
-        <div class="stat-card">
-
-            <span>Slot Terisi</span>
-
-            <strong>{{ terisi }}</strong>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <span>Slot Kosong</span>
-
-            <strong>{{ kosong }}</strong>
-
-        </div>
-
-    </div>
-
 
     <div class="card">
 
-        <div class="title-row">
-
-            <h2>Daftar Slot Parkir</h2>
-
-            <a href="/" class="button">
-                Refresh
-            </a>
-
-        </div>
-
+        <h2>Status Slot Parkir</h2>
 
         <div class="slot-grid">
 
-            {% for item in data %}
+            {% for nomor_slot, status in slot.items() %}
 
-            <div class="slot-card
-                {% if item.status == 'TERISI' %}
-                occupied
-                {% else %}
-                available
-                {% endif %}
-            ">
+            <div class="slot-card">
 
-                <h3>{{ item.slot }}</h3>
+                <h3>{{ nomor_slot }}</h3>
 
-                <p>{{ item.no_plat }}</p>
-
-                <span>{{ item.status }}</span>
+                <p>{{ status }}</p>
 
             </div>
 
@@ -92,5 +44,4 @@
 </div>
 
 </body>
-
 </html>

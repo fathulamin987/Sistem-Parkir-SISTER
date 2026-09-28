@@ -2,17 +2,12 @@
 <html lang="id">
 
 <head>
-
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Manajer Parkir</title>
+    <title>Laporan Manajer</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
-
 </head>
 
 <body>
@@ -23,147 +18,79 @@
 
         <h1>Sistem Parkir</h1>
 
-        <p>Dashboard Manajemen</p>
-
-    </div>
-
-
-    <div class="stats">
-
-        <div class="stat-card">
-
-            <span>Total Transaksi</span>
-
-            <strong>
-                {{ laporan.total_transaksi }}
-            </strong>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <span>Total Pendapatan</span>
-
-            <strong class="money">
-
-                Rp {{ "{:,.0f}".format(
-                    laporan.total_pendapatan
-                ).replace(",", ".") }}
-
-            </strong>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <span>Kendaraan Parkir</span>
-
-            <strong>
-                {{ laporan.kendaraan_parkir }}
-            </strong>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <span>Slot Kosong</span>
-
-            <strong>
-                {{ laporan.slot_kosong }}
-            </strong>
-
-        </div>
+        <p>Laporan Manajemen</p>
 
     </div>
 
 
     <div class="card">
 
-        <div class="title-row">
+        <h2>Laporan Parkir</h2>
 
-            <h2>5 Transaksi Terakhir</h2>
+        {% for key, value in laporan.items() %}
 
-            <a href="/" class="button">
-                Refresh
-            </a>
+        <p>
+            <strong>{{ key }}</strong> :
+            {{ value }}
+        </p>
 
-        </div>
+        {% endfor %}
 
-
-        {% if laporan.transaksi_terakhir %}
-
-        <div class="table-wrapper">
-
-            <table>
-
-                <thead>
-
-                    <tr>
-
-                        <th>ID Transaksi</th>
-                        <th>Plat</th>
-                        <th>Jenis</th>
-                        <th>Slot</th>
-                        <th>Durasi</th>
-                        <th>Total</th>
-
-                    </tr>
-
-                </thead>
+    </div>
 
 
-                <tbody>
+    <div class="card">
 
-                    {% for item in laporan.transaksi_terakhir %}
+        <h2>Riwayat Transaksi</h2>
 
-                    <tr>
+        {% if riwayat %}
 
-                        <td>
-                            {{ item.id_transaksi }}
-                        </td>
+        <table>
 
-                        <td>
-                            {{ item.no_plat }}
-                        </td>
+            <thead>
 
-                        <td>
-                            {{ item.jenis }}
-                        </td>
+                <tr>
+                    <th>ID Tiket</th>
+                    <th>Nomor Plat</th>
+                    <th>Jenis</th>
+                    <th>Total Bayar</th>
+                </tr>
 
-                        <td>
-                            {{ item.slot }}
-                        </td>
+            </thead>
 
-                        <td>
-                            {{ item.durasi }} jam
-                        </td>
+            <tbody>
 
-                        <td>
+                {% for data in riwayat %}
 
-                            Rp {{ "{:,.0f}".format(
-                                item.total_bayar
-                            ).replace(",", ".") }}
+                <tr>
 
-                        </td>
+                    <td>
+                        {{ data.id_tiket }}
+                    </td>
 
-                    </tr>
+                    <td>
+                        {{ data.nomor_plat }}
+                    </td>
 
-                    {% endfor %}
+                    <td>
+                        {{ data.jenis }}
+                    </td>
 
-                </tbody>
+                    <td>
+                        Rp {{ data.total_bayar }}
+                    </td>
 
-            </table>
+                </tr>
 
-        </div>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
 
         {% else %}
 
-        <div class="empty">
-            Belum ada transaksi.
-        </div>
+        <p>Belum ada transaksi.</p>
 
         {% endif %}
 

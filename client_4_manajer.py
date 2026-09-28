@@ -1,15 +1,12 @@
 from flask import Flask, render_template
-import xmlrpc.client
-
+from xmlrpc.client import ServerProxy
 
 app = Flask(__name__)
 
 IP_SERVER = "10.164.164.29"
-PORT_SERVER = 8000
 
-
-server = xmlrpc.client.ServerProxy(
-    f"http://{IP_SERVER}:{PORT_SERVER}",
+server = ServerProxy(
+    f"http://{IP_SERVER}:8000",
     allow_none=True
 )
 
@@ -17,16 +14,18 @@ server = xmlrpc.client.ServerProxy(
 @app.route("/")
 def manajer():
 
-    laporan = server.get_laporan()
+    laporan = server.laporan()
+
+    riwayat = server.riwayat_transaksi()
 
     return render_template(
         "manajer.html",
-        laporan=laporan
+        laporan=laporan,
+        riwayat=riwayat
     )
 
 
 if __name__ == "__main__":
-
     app.run(
         host="0.0.0.0",
         port=5004,
