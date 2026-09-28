@@ -1,57 +1,32 @@
-from xmlrpc.client import ServerProxy
+from flask import Flask, render_template
+import xmlrpc.client
 
+
+app = Flask(__name__)
 
 IP_SERVER = "localhost"
+PORT_SERVER = 8000
 
-server = ServerProxy(
-    f"http://{IP_SERVER}:8000",
+server = xmlrpc.client.ServerProxy(
+    f"http://{IP_SERVER}:{PORT_SERVER}",
     allow_none=True
 )
 
 
-print("====================================")
-print("       LAPORAN MANAJEMEN PARKIR")
-print("====================================")
+@app.route("/")
+def manajer():
+
+    laporan = server.get_laporan()
+
+    return render_template(
+        "manajer.html",
+        laporan=laporan
+    )
 
 
-laporan = server.laporan()
-
-print("Total Transaksi        :", laporan["total_transaksi"])
-print("Total Pendapatan       : Rp",
-      format(laporan["total_pendapatan"], ","))
-
-print("Kendaraan Sedang Parkir:",
-      laporan["kendaraan_sedang_parkir"])
-
-print("Slot Terisi            :",
-      laporan["slot_terisi"])
-
-print("Slot Kosong            :",
-      laporan["slot_kosong"])
-
-
-print()
-print("====================================")
-print("       5 TRANSAKSI TERAKHIR")
-print("====================================")
-
-
-riwayat = server.riwayat_transaksi()
-
-if len(riwayat) == 0:
-
-    print("Belum ada transaksi.")
-
-else:
-
-    for data in riwayat:
-
-        print("------------------------------------")
-        print("ID Tiket   :", data["id_tiket"])
-        print("Nomor Plat :", data["nomor_plat"])
-        print("Jenis      :", data["jenis"])
-        print("Durasi     :", data["durasi_jam"], "jam")
-        print("Total      : Rp",
-              format(data["total_bayar"], ","))
-
-print("------------------------------------")
+if __name__ == "__main__":
+    app.run(
+        host="0.0.0.0",
+        port=5004,
+        debug=True
+    )

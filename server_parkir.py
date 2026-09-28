@@ -1,15 +1,17 @@
 from xmlrpc.server import SimpleXMLRPCServer
 from socketserver import ThreadingMixIn
 from datetime import datetime
-import threading
 import uuid
+import threading
 
 
-# ==============================
-# DATA AWAL
-# ==============================
+# Server dapat melayani beberapa client secara bersamaan
+class ThreadedXMLRPCServer(ThreadingMixIn, SimpleXMLRPCServer):
+    pass
 
-slot_parkir = {
+
+# Data slot parkir
+slots = {
     "A01": None,
     "A02": None,
     "A03": None,
@@ -22,35 +24,35 @@ slot_parkir = {
     "A10": None
 }
 
+# Data kendaraan yang sedang parkir
 kendaraan = {}
-riwayat = []
 
+# Riwayat transaksi
+transaksi = []
+
+# Pengaman data ketika banyak client mengakses server
 lock = threading.Lock()
 
 
-# ==============================
-# FUNGSI KENDARAAN MASUK
-# ==============================
-
-def kendaraan_masuk(nomor_plat, jenis):
+def kendaraan_masuk(no_plat, jenis):
     with lock:
 
-        # Cek apakah kendaraan sudah parkir
-        if nomor_plat in kendaraan:
+        # Cek apakah kendaraan sudah ada
+        if no_plat in kendaraan:
             return {
                 "status": False,
                 "pesan": "Kendaraan tersebut masih berada di area parkir."
             }
 
         # Cari slot kosong
-        slot = None
+        slot_ditemukan = None
 
-        for nomor_slot in slot_parkir:
-            if slot_parkir[nomor_slot] is None:
-                slot = nomor_slot
+        for nomor_slot, data in slots.items():
+            if data is None:
+                slot_ditemukan = nomor_slot
                 break
 
-        if slot is None:
+        if slot_ditemukan is None:
             return {
                 "status": False,
                 "pesan": "Parkiran penuh."
@@ -61,41 +63,35 @@ def kendaraan_masuk(nomor_plat, jenis):
 
         waktu_masuk = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        data = {
+        data_kendaraan = {
             "id_tiket": id_tiket,
-            "nomor_plat": nomor_plat,
+            "no_plat": no_plat,
             "jenis": jenis,
-            "slot": slot,
+            "slot": slot_ditemukan,
             "waktu_masuk": waktu_masuk
         }
 
-        kendaraan[nomor_plat] = data
-        slot_parkir[slot] = nomor_plat
+        kendaraan[no_plat] = data_kendaraan
+        slots[slot_ditemukan] = data_kendaraan
 
         return {
             "status": True,
             "pesan": "Kendaraan berhasil masuk.",
-            "data": data
+            "data": data_kendaraan
         }
 
 
-# ==============================
-# FUNGSI KENDARAAN KELUAR
-# ==============================
-
-def kendaraan_keluar(nomor_plat):
-
+def kendaraan_keluar(no_plat):
     with lock:
 
-        if nomor_plat not in kendaraan:
+        if no_plat not in kendaraan:
             return {
                 "status": False,
                 "pesan": "Kendaraan tidak ditemukan."
             }
 
-        data = kendaraan[nomor_plat]
+        data = kendaraan[no_plat]
 
-        # Hitung durasi parkir
         waktu_masuk = datetime.strptime(
             data["waktu_masuk"],
             "%Y-%m-%d %H:%M:%S"
@@ -103,140 +99,105 @@ def kendaraan_keluar(nomor_plat):
 
         waktu_keluar = datetime.now()
 
-        durasi = waktu_keluar - waktu_masuk
-        total_detik = durasi.total_seconds()
+        durasi_detik = (waktu_keluar - waktu_masuk).total_seconds()
 
         # Minimal dihitung 1 jam
-        jam = max(1, int(total_detik / 3600))
+        durasi_jam = max(1, int((durasi_detik + 3599) // 3600))
 
-        # Tarif
         if data["jenis"].lower() == "motor":
             tarif = 2000
         else:
             tarif = 5000
 
-        total_bayar = jam * tarif
+        total_bayar = durasi_jam * tarif
 
-        # Kosongkan slot
-        slot = data["slot"]
-        slot_parkir[slot] = None
+        waktu_keluar_text = waktu_keluar.strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
 
-        # Simpan transaksi
-        transaksi = {
+        data_transaksi = {
+            "id_transaksi": str(uuid.uuid4())[:8],
             "id_tiket": data["id_tiket"],
-            "nomor_plat": nomor_plat,
+            "no_plat": data["no_plat"],
             "jenis": data["jenis"],
-            "slot": slot,
+            "slot": data["slot"],
             "waktu_masuk": data["waktu_masuk"],
-            "waktu_keluar": waktu_keluar.strftime("%Y-%m-%d %H:%M:%S"),
-            "durasi_jam": jam,
+            "waktu_keluar": waktu_keluar_text,
+            "durasi": durasi_jam,
             "total_bayar": total_bayar
         }
 
-        riwayat.append(transaksi)
+        # Kosongkan slot
+        slots[data["slot"]] = None
 
-        # Hapus kendaraan yang sedang parkir
-        del kendaraan[nomor_plat]
+        # Hapus kendaraan dari daftar parkir
+        del kendaraan[no_plat]
+
+        # Simpan transaksi
+        transaksi.append(data_transaksi)
 
         return {
             "status": True,
             "pesan": "Kendaraan berhasil keluar.",
-            "data": transaksi
+            "data": data_transaksi
         }
 
 
-# ==============================
-# MELIHAT KONDISI PARKIR
-# ==============================
-
-def lihat_slot():
-
+def get_status_parkir():
     with lock:
 
-        hasil = {}
+        hasil = []
 
-        for slot, plat in slot_parkir.items():
+        for nomor_slot, data in slots.items():
 
-            if plat is None:
-                hasil[slot] = "KOSONG"
+            if data is None:
+                hasil.append({
+                    "slot": nomor_slot,
+                    "status": "KOSONG",
+                    "no_plat": "-"
+                })
             else:
-                hasil[slot] = plat
+                hasil.append({
+                    "slot": nomor_slot,
+                    "status": "TERISI",
+                    "no_plat": data["no_plat"]
+                })
 
         return hasil
 
 
-# ==============================
-# MENCARI KENDARAAN
-# ==============================
-
-def cari_kendaraan(nomor_plat):
-
+def get_laporan():
     with lock:
 
-        if nomor_plat not in kendaraan:
-            return {
-                "status": False,
-                "pesan": "Kendaraan tidak sedang parkir."
-            }
+        total_transaksi = len(transaksi)
+
+        total_pendapatan = sum(
+            item["total_bayar"]
+            for item in transaksi
+        )
+
+        kendaraan_parkir = len(kendaraan)
+
+        slot_terisi = sum(
+            1 for data in slots.values()
+            if data is not None
+        )
+
+        slot_kosong = len(slots) - slot_terisi
+
+        transaksi_terakhir = transaksi[-5:]
 
         return {
-            "status": True,
-            "data": kendaraan[nomor_plat]
-        }
-
-
-# ==============================
-# LAPORAN MANAJEMEN
-# ==============================
-
-def laporan():
-
-    with lock:
-
-        total_pendapatan = 0
-
-        for transaksi in riwayat:
-            total_pendapatan += transaksi["total_bayar"]
-
-        total_kendaraan_sedang_parkir = len(kendaraan)
-
-        total_slot = len(slot_parkir)
-
-        slot_terisi = total_kendaraan_sedang_parkir
-
-        slot_kosong = total_slot - slot_terisi
-
-        return {
-            "total_transaksi": len(riwayat),
+            "total_transaksi": total_transaksi,
             "total_pendapatan": total_pendapatan,
-            "kendaraan_sedang_parkir": total_kendaraan_sedang_parkir,
+            "kendaraan_parkir": kendaraan_parkir,
             "slot_terisi": slot_terisi,
-            "slot_kosong": slot_kosong
+            "slot_kosong": slot_kosong,
+            "transaksi_terakhir": transaksi_terakhir
         }
 
 
-# ==============================
-# RIWAYAT TRANSAKSI
-# ==============================
-
-def riwayat_transaksi():
-
-    with lock:
-
-        return riwayat[-5:]
-
-
-# ==============================
-# SERVER RPC
-# ==============================
-
-class ThreadedXMLRPCServer(
-    ThreadingMixIn,
-    SimpleXMLRPCServer
-):
-    pass
-
-
+# Membuat server
 server = ThreadedXMLRPCServer(
     ("0.0.0.0", 8000),
     allow_none=True
@@ -244,16 +205,16 @@ server = ThreadedXMLRPCServer(
 
 server.register_function(kendaraan_masuk, "kendaraan_masuk")
 server.register_function(kendaraan_keluar, "kendaraan_keluar")
-server.register_function(lihat_slot, "lihat_slot")
-server.register_function(cari_kendaraan, "cari_kendaraan")
-server.register_function(laporan, "laporan")
-server.register_function(riwayat_transaksi, "riwayat_transaksi")
+server.register_function(get_status_parkir, "get_status_parkir")
+server.register_function(get_laporan, "get_laporan")
 
-print("====================================")
-print("      SERVER PARKIR KAMPUS")
-print("====================================")
-print("Server berjalan pada port 8000")
-print("Menunggu koneksi dari client...")
-print("====================================")
+
+print("=" * 50)
+print("           SERVER SISTEM PARKIR")
+print("=" * 50)
+print("Server aktif")
+print("Port : 8000")
+print("Status : Menunggu koneksi client...")
+print("=" * 50)
 
 server.serve_forever()

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen - Sistem Parkir</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container wide">
+
+    <div class="header">
+        <h1>Sistem Parkir Kampus</h1>
+        <p>Dashboard Manajemen</p>
+    </div>
+
+    <div class="stats">
+
+        <div class="stat-card">
+            <span>Total Transaksi</span>
+            <strong>
+                {{ laporan.total_transaksi }}
+            </strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Total Pendapatan</span>
+            <strong class="money">
+                Rp {{ "{:,.0f}".format(laporan.total_pendapatan).replace(",", ".") }}
+            </strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Kendaraan Parkir</span>
+            <strong>
+                {{ laporan.kendaraan_parkir }}
+            </strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Slot Kosong</span>
+            <strong>
+                {{ laporan.slot_kosong }}
+            </strong>
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <div class="title-row">
+
+            <h2>5 Transaksi Terakhir</h2>
+
+            <a href="/" class="button">
+                Refresh
+            </a>
+
+        </div>
+
+        {% if laporan.transaksi_terakhir %}
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>ID Transaksi</th>
+                        <th>Plat</th>
+                        <th>Jenis</th>
+                        <th>Slot</th>
+                        <th>Durasi</th>
+                        <th>Total</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for item in laporan.transaksi_terakhir %}
+
+                    <tr>
+
+                        <td>
+                            {{ item.id_transaksi }}
+                        </td>
+
+                        <td>
+                            {{ item.no_plat }}
+                        </td>
+
+                        <td>
+                            {{ item.jenis }}
+                        </td>
+
+                        <td>
+                            {{ item.slot }}
+                        </td>
+
+                        <td>
+                            {{ item.durasi }} jam
+                        </td>
+
+                        <td>
+                            Rp {{ "{:,.0f}".format(item.total_bayar).replace(",", ".") }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="empty">
+            Belum ada transaksi.
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+</html>

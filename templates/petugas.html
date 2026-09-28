@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petugas - Sistem Parkir</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container wide">
+
+    <div class="header">
+        <h1>Sistem Parkir Kampus</h1>
+        <p>Monitoring Petugas</p>
+    </div>
+
+    <div class="stats">
+
+        <div class="stat-card">
+            <span>Slot Terisi</span>
+            <strong>{{ terisi }}</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Slot Kosong</span>
+            <strong>{{ kosong }}</strong>
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <div class="title-row">
+            <h2>Daftar Slot Parkir</h2>
+
+            <a href="/" class="button">
+                Refresh
+            </a>
+        </div>
+
+        <div class="slot-grid">
+
+            {% for item in data %}
+
+            <div class="slot-card
+                {% if item.status == 'TERISI' %}
+                    occupied
+                {% else %}
+                    available
+                {% endif %}
+            ">
+
+                <h3>{{ item.slot }}</h3>
+
+                <p>{{ item.no_plat }}</p>
+
+                <span>
+                    {{ item.status }}
+                </span>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

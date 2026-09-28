@@ -1,42 +1,40 @@
-from xmlrpc.client import ServerProxy
+from flask import Flask, render_template, request
+import xmlrpc.client
 
+
+app = Flask(__name__)
 
 IP_SERVER = "localhost"
+PORT_SERVER = 8000
 
-server = ServerProxy(
-    f"http://{IP_SERVER}:8000",
+server = xmlrpc.client.ServerProxy(
+    f"http://{IP_SERVER}:{PORT_SERVER}",
     allow_none=True
 )
 
 
-print("====================================")
-print("       PINTU KELUAR PARKIR")
-print("====================================")
+@app.route("/", methods=["GET", "POST"])
+def keluar():
 
-nomor_plat = input("Nomor Plat : ")
+    hasil = None
 
-hasil = server.kendaraan_keluar(
-    nomor_plat
-)
+    if request.method == "POST":
 
-print()
+        no_plat = request.form["no_plat"]
 
-if hasil["status"]:
+        hasil = server.kendaraan_keluar(
+            no_plat
+        )
 
-    data = hasil["data"]
+    return render_template(
+        "keluar.html",
+        hasil=hasil
+    )
 
-    print("Kendaraan berhasil keluar.")
-    print("------------------------------------")
-    print("ID Tiket    :", data["id_tiket"])
-    print("Nomor Plat  :", data["nomor_plat"])
-    print("Jenis       :", data["jenis"])
-    print("Slot        :", data["slot"])
-    print("Waktu Masuk :", data["waktu_masuk"])
-    print("Waktu Keluar:", data["waktu_keluar"])
-    print("Durasi      :", data["durasi_jam"], "jam")
-    print("Total Bayar : Rp", format(data["total_bayar"], ","))
-    print("------------------------------------")
 
-else:
-
-    print("Gagal:", hasil["pesan"])
+if __name__ == "__main__":
+    app.run(
+        host="0.0.0.0",
+        port=5002,
+        debug=True
+    )

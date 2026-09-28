@@ -1,31 +1,44 @@
-from xmlrpc.client import ServerProxy
+from flask import Flask, render_template
+import xmlrpc.client
 
+
+app = Flask(__name__)
 
 IP_SERVER = "localhost"
+PORT_SERVER = 8000
 
-server = ServerProxy(
-    f"http://{IP_SERVER}:8000",
+server = xmlrpc.client.ServerProxy(
+    f"http://{IP_SERVER}:{PORT_SERVER}",
     allow_none=True
 )
 
 
-print("====================================")
-print("        MONITORING PARKIR")
-print("====================================")
+@app.route("/")
+def petugas():
 
-slot = server.lihat_slot()
+    data = server.get_status_parkir()
 
-for nomor_slot, status in slot.items():
+    terisi = 0
+    kosong = 0
 
-    print(
-        nomor_slot,
-        "->",
-        status
+    for item in data:
+
+        if item["status"] == "TERISI":
+            terisi += 1
+        else:
+            kosong += 1
+
+    return render_template(
+        "petugas.html",
+        data=data,
+        terisi=terisi,
+        kosong=kosong
     )
 
-print("------------------------------------")
 
-laporan = server.laporan()
-
-print("Slot Terisi :", laporan["slot_terisi"])
-print("Slot Kosong :", laporan["slot_kosong"])
+if __name__ == "__main__":
+    app.run(
+        host="0.0.0.0",
+        port=5003,
+        debug=True
+    )
