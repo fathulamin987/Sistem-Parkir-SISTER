@@ -1,10 +1,18 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pintu Keluar - Sistem Parkir</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Pintu Keluar</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
 <body>
@@ -12,9 +20,13 @@
 <div class="container">
 
     <div class="header">
-        <h1>Sistem Parkir Kampus</h1>
+
+        <h1>Sistem Parkir</h1>
+
         <p>Pintu Keluar</p>
+
     </div>
+
 
     <div class="card">
 
@@ -31,6 +43,7 @@
                 required
             >
 
+
             <button type="submit">
                 Proses Kendaraan Keluar
             </button>
@@ -39,11 +52,19 @@
 
     </div>
 
+
     {% if hasil %}
 
-    <div class="result {% if hasil.status %}success{% else %}error{% endif %}">
+    <div class="result
+        {% if hasil.status %}
+        success
+        {% else %}
+        error
+        {% endif %}
+    ">
 
         <h3>{{ hasil.pesan }}</h3>
+
 
         {% if hasil.status %}
 
@@ -73,7 +94,11 @@
         </p>
 
         <div class="price">
-            Rp {{ "{:,.0f}".format(hasil.data.total_bayar).replace(",", ".") }}
+
+            Rp {{ "{:,.0f}".format(
+                hasil.data.total_bayar
+            ).replace(",", ".") }}
+
         </div>
 
         {% endif %}
@@ -85,4 +110,5 @@
 </div>
 
 </body>
+
 </html>

@@ -4,8 +4,9 @@ import xmlrpc.client
 
 app = Flask(__name__)
 
-IP_SERVER = "localhost"
+IP_SERVER = "10.164.164.29"
 PORT_SERVER = 8000
+
 
 server = xmlrpc.client.ServerProxy(
     f"http://{IP_SERVER}:{PORT_SERVER}",
@@ -25,6 +26,7 @@ def manajer():
 
 
 if __name__ == "__main__":
+
     app.run(
         host="0.0.0.0",
         port=5004,

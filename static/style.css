@@ -29,7 +29,6 @@ body {
 
 .header h1 {
     margin: 0 0 5px 0;
-    font-size: 26px;
 }
 
 .header p {
@@ -217,6 +216,7 @@ th {
     color: #6b7280;
 }
 
+
 @media (max-width: 800px) {
 
     .stats {
@@ -227,6 +227,7 @@ th {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
 
 @media (max-width: 500px) {
 

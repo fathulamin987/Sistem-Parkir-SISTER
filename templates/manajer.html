@@ -1,10 +1,18 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen - Sistem Parkir</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Manajer Parkir</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
 <body>
@@ -12,41 +20,65 @@
 <div class="container wide">
 
     <div class="header">
-        <h1>Sistem Parkir Kampus</h1>
+
+        <h1>Sistem Parkir</h1>
+
         <p>Dashboard Manajemen</p>
+
     </div>
+
 
     <div class="stats">
 
         <div class="stat-card">
+
             <span>Total Transaksi</span>
+
             <strong>
                 {{ laporan.total_transaksi }}
             </strong>
+
         </div>
 
+
         <div class="stat-card">
+
             <span>Total Pendapatan</span>
+
             <strong class="money">
-                Rp {{ "{:,.0f}".format(laporan.total_pendapatan).replace(",", ".") }}
+
+                Rp {{ "{:,.0f}".format(
+                    laporan.total_pendapatan
+                ).replace(",", ".") }}
+
             </strong>
+
         </div>
 
+
         <div class="stat-card">
+
             <span>Kendaraan Parkir</span>
+
             <strong>
                 {{ laporan.kendaraan_parkir }}
             </strong>
+
         </div>
 
+
         <div class="stat-card">
+
             <span>Slot Kosong</span>
+
             <strong>
                 {{ laporan.slot_kosong }}
             </strong>
+
         </div>
 
     </div>
+
 
     <div class="card">
 
@@ -60,6 +92,7 @@
 
         </div>
 
+
         {% if laporan.transaksi_terakhir %}
 
         <div class="table-wrapper">
@@ -69,15 +102,18 @@
                 <thead>
 
                     <tr>
+
                         <th>ID Transaksi</th>
                         <th>Plat</th>
                         <th>Jenis</th>
                         <th>Slot</th>
                         <th>Durasi</th>
                         <th>Total</th>
+
                     </tr>
 
                 </thead>
+
 
                 <tbody>
 
@@ -106,7 +142,11 @@
                         </td>
 
                         <td>
-                            Rp {{ "{:,.0f}".format(item.total_bayar).replace(",", ".") }}
+
+                            Rp {{ "{:,.0f}".format(
+                                item.total_bayar
+                            ).replace(",", ".") }}
+
                         </td>
 
                     </tr>
@@ -132,4 +172,5 @@
 </div>
 
 </body>
+
 </html>
