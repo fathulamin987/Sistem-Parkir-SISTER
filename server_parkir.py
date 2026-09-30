@@ -5,7 +5,12 @@ from datetime import datetime
 import threading
 
 
-IP_SERVER = "0.0.0.0"
+# =========================
+# KONFIGURASI SERVER
+# =========================
+
+# 0.0.0.0 = menerima koneksi dari device lain
+IP_SERVER = "localhost"
 PORT_SERVER = 8000
 
 
@@ -92,7 +97,10 @@ def kendaraan_keluar(no_plat):
                     waktu_keluar - waktu_masuk
                 ).total_seconds() / 3600
 
-                durasi_jam = max(1, int(durasi + 0.999))
+                durasi_jam = max(
+                    1,
+                    int(durasi + 0.999)
+                )
 
                 if data["jenis"].lower() == "motor":
                     tarif = 2000
@@ -142,8 +150,11 @@ def lihat_slot():
         for nomor_slot, data in slot_parkir.items():
 
             if data is None:
+
                 hasil[nomor_slot] = "KOSONG"
+
             else:
+
                 hasil[nomor_slot] = (
                     "TERISI - " + data["no_plat"]
                 )
@@ -178,17 +189,55 @@ def get_status_parkir():
 
 
 # =========================
-# RIWAYAT
+# LAPORAN MANAJER
+# =========================
+
+def laporan():
+
+    with lock:
+
+        total_slot = len(slot_parkir)
+
+        terisi = 0
+
+        for data in slot_parkir.values():
+
+            if data is not None:
+                terisi += 1
+
+        kosong = total_slot - terisi
+
+        total_pendapatan = 0
+
+        for transaksi in riwayat:
+
+            total_pendapatan += transaksi["total_bayar"]
+
+        jumlah_transaksi = len(riwayat)
+
+        return {
+            "total_slot": total_slot,
+            "terisi": terisi,
+            "kosong": kosong,
+            "total_pendapatan": total_pendapatan,
+            "jumlah_transaksi": jumlah_transaksi,
+            "riwayat": riwayat[-5:]
+        }
+
+
+# =========================
+# RIWAYAT TRANSAKSI
 # =========================
 
 def get_riwayat():
 
     with lock:
+
         return riwayat
 
 
 # =========================
-# SERVER XML RPC
+# SERVER XML-RPC
 # =========================
 
 class ThreadedXMLRPCServer(
@@ -230,14 +279,24 @@ server.register_function(
 )
 
 server.register_function(
+    laporan,
+    "laporan"
+)
+
+server.register_function(
     get_riwayat,
     "get_riwayat"
 )
 
 
+# =========================
+# INFORMASI SERVER
+# =========================
+
 print("===================================")
-print("     SERVER SISTEM PARKIR")
+print("       SERVER SISTEM PARKIR")
 print("===================================")
+print("")
 print("Server berjalan pada:")
 print("0.0.0.0:8000")
 print("")
@@ -246,10 +305,15 @@ print("- kendaraan_masuk")
 print("- kendaraan_keluar")
 print("- lihat_slot")
 print("- get_status_parkir")
+print("- laporan")
 print("- get_riwayat")
 print("")
 print("Server siap menerima client...")
 print("===================================")
 
+
+# =========================
+# JALANKAN SERVER
+# =========================
 
 server.serve_forever()

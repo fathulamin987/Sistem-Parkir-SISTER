@@ -5,7 +5,7 @@ import xmlrpc.client
 app = Flask(__name__)
 
 
-IP_SERVER = "192.168.137.254"
+IP_SERVER = "localhost"
 PORT_SERVER = 8000
 
 

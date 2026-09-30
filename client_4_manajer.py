@@ -1,13 +1,10 @@
 from flask import Flask, render_template
-from xmlrpc.client import ServerProxy
-
+from xmlrpc.client import ServerProxy, Fault
 
 app = Flask(__name__)
 
-
-IP_SERVER = "192.168.137.254"
+IP_SERVER = "localhost"
 PORT_SERVER = 8000
-
 
 server = ServerProxy(
     f"http://{IP_SERVER}:{PORT_SERVER}",
@@ -19,23 +16,19 @@ server = ServerProxy(
 def manajer():
 
     try:
-
-        laporan = server.laporan()
-
-        riwayat = server.riwayat_transaksi()
+        laporan = server.get_riwayat()
 
         return render_template(
             "manajer.html",
             laporan=laporan,
-            riwayat=riwayat
+            error=None
         )
 
     except Exception as e:
 
         return render_template(
             "manajer.html",
-            laporan={},
-            riwayat=[],
+            laporan=[],
             error=str(e)
         )
 

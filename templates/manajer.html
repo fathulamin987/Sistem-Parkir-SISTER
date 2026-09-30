@@ -32,128 +32,101 @@
 
     <div class="result error">
 
-        <h3>Koneksi ke Server Gagal</h3>
+        <h2>Koneksi ke Server Gagal</h2>
 
         <p>{{ error }}</p>
 
-    </div>
-
-    {% else %}
-
-
-    <div class="stats">
-
-        <div class="stat-card">
-
-            <h3>Total Transaksi</h3>
-
-            <p>{{ laporan.total_transaksi }}</p>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <h3>Total Pendapatan</h3>
-
-            <p>
-                Rp {{ "{:,.0f}".format(
-                    laporan.total_pendapatan
-                ).replace(",", ".") }}
-            </p>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <h3>Slot Terisi</h3>
-
-            <p>{{ laporan.slot_terisi }}</p>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <h3>Slot Kosong</h3>
-
-            <p>{{ laporan.slot_kosong }}</p>
-
-        </div>
+        <p>
+            Server: {{ "192.168.137.254" }}:8000
+        </p>
 
     </div>
+
+    {% endif %}
 
 
     <div class="card">
 
-        <h2>5 Transaksi Terakhir</h2>
-
-        {% if riwayat %}
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>ID Tiket</th>
-                    <th>Nomor Plat</th>
-                    <th>Jenis</th>
-                    <th>Durasi</th>
-                    <th>Total Bayar</th>
-
-                </tr>
-
-            </thead>
+        <h2>Riwayat Parkir</h2>
 
 
-            <tbody>
+        {% if laporan %}
 
-                {% for data in riwayat %}
+        <div style="overflow-x: auto;">
 
-                <tr>
+            <table>
 
-                    <td>
-                        {{ data.id_tiket }}
-                    </td>
+                <thead>
 
-                    <td>
-                        {{ data.no_plat }}
-                    </td>
+                    <tr>
 
-                    <td>
-                        {{ data.jenis }}
-                    </td>
+                        <th>ID Transaksi</th>
+                        <th>Nomor Plat</th>
+                        <th>Jenis</th>
+                        <th>Slot</th>
+                        <th>Durasi</th>
+                        <th>Total Bayar</th>
+                        <th>Waktu Keluar</th>
 
-                    <td>
-                        {{ data.durasi_jam }} jam
-                    </td>
+                    </tr>
 
-                    <td>
-                        Rp {{ "{:,.0f}".format(
-                            data.total_bayar
-                        ).replace(",", ".") }}
-                    </td>
+                </thead>
 
-                </tr>
+                <tbody>
 
-                {% endfor %}
+                    {% for data in laporan %}
 
-            </tbody>
+                    <tr>
 
-        </table>
+                        <td>
+                            {{ data.id_transaksi }}
+                        </td>
+
+                        <td>
+                            {{ data.no_plat }}
+                        </td>
+
+                        <td>
+                            {{ data.jenis }}
+                        </td>
+
+                        <td>
+                            {{ data.slot }}
+                        </td>
+
+                        <td>
+                            {{ data.durasi }} jam
+                        </td>
+
+                        <td>
+                            Rp {{ "{:,.0f}".format(
+                                data.total_bayar
+                            ).replace(",", ".") }}
+                        </td>
+
+                        <td>
+                            {{ data.waktu_keluar }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
 
         {% else %}
 
-        <p>Belum ada transaksi.</p>
+        <p>
+            Belum ada riwayat kendaraan keluar.
+        </p>
 
         {% endif %}
 
     </div>
-
-
-    {% endif %}
 
 </div>
 
