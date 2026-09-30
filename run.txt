@@ -1,33 +1,22 @@
-Jalankan menggunakan 4 device menggunakan ini :
-ALUR MENJALANKAN SISTEM PARKIR RPC - 4 DEVICE
+CATATAN KONFIGURASI IP SERVER
+MENJALANKAN MENGGUNAKAN 4 DEVICE
 
-1. Semua device terhubung ke Wi-Fi yang sama.
+SERVER
+Laptop yang menjadi SERVER di code server_parkir.py :
+IP_SERVER = "0.0.0.0"
+dan di semua code client 1-4.py menggunakan localhost atau ip sendiri yang jadi server
 
-2. DEVICE 1
-   - Jalankan server:
-     python server_parkir.py
-   - Cek IP server dengan:
-     ipconfig
-   - Misalnya IP: 192.168.1.10
-   - Jalankan:
-     python client_1_masuk.py
 
-3. DEVICE 2
-   - Ubah IP_SERVER menjadi IP Device 1.
-   - Jalankan:
-     python client_2_keluar.py
+CLIENT
+untuk laptop client semua code client 1-4.py dan server_parkir.py menggunakan :
+IP_SERVER = "isi dengan IP temanmu yang jadi server"
 
-4. DEVICE 3
-   - Ubah IP_SERVER menjadi IP Device 1.
-   - Jalankan:
-     python client_3_petugas.py
 
-5. DEVICE 4
-   - Ubah IP_SERVER menjadi IP Device 1.
-   - Jalankan:
-     python client_4_manajer.py
+Semua client harus menggunakan IP server yang sama agar terhubung ke satu server 
+dan menggunakan data parkir yang sama.
 
-URUTAN DEMO:
+
+URUTAN DEMO
 
 Kendaraan masuk
 → Server menyimpan data
@@ -36,11 +25,17 @@ Kendaraan masuk
 → Server mengosongkan slot
 → Manajer melihat transaksi dan pendapatan
 
-Catatan:
-Server harus tetap berjalan selama semua client digunakan.
-Semua client menggunakan IP Server yang sama.
+
+CATATAN
+-Server harus tetap berjalan selama semua client digunakan.
+-Semua client menggunakan IP Server yang sama.
+-Semua device harus berada dalam jaringan Wi-Fi yang sama.
+-IP Server diperoleh dari ipconfig pada Device 1.
 
 
+MENJALANKAN MENGGUNAKAN 1 DEVICE
+Jika semua program dijalankan pada satu laptop, di code server_parkir.py gunakan:
+IP_SERVER = "localhost"
 
-Jalankan menggunakan 1 device menggunakan ini :
+Semua code client dapat menggunakan:
 IP_SERVER = "localhost"
