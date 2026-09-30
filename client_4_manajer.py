@@ -3,7 +3,7 @@ from xmlrpc.client import ServerProxy
 
 app = Flask(__name__)
 
-IP_SERVER = "10.164.164.29"
+IP_SERVER = "192.168.137.254"
 
 server = ServerProxy(
     f"http://{IP_SERVER}:8000",
