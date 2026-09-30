@@ -23,9 +23,26 @@ def keluar():
 
         no_plat = request.form["no_plat"]
 
-        hasil = server.kendaraan_keluar(
-            no_plat
-        )
+        try:
+
+            hasil = server.kendaraan_keluar(
+                no_plat
+            )
+
+            # Memastikan nomor plat tetap ditampilkan
+            if hasil and hasil.get("status"):
+
+                if "data" not in hasil:
+                    hasil["data"] = {}
+
+                hasil["data"]["no_plat"] = no_plat
+
+        except Exception as e:
+
+            hasil = {
+                "status": False,
+                "pesan": "Gagal terhubung ke server: " + str(e)
+            }
 
     return render_template(
         "keluar.html",

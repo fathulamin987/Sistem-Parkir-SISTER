@@ -15,6 +15,7 @@
 
 </head>
 
+
 <body>
 
 <div class="container">
@@ -32,12 +33,17 @@
 
         <h2>Kendaraan Keluar</h2>
 
+
         <form method="POST">
 
-            <label>Nomor Plat</label>
+            <label for="no_plat">
+                Nomor Plat
+            </label>
+
 
             <input
                 type="text"
+                id="no_plat"
                 name="no_plat"
                 placeholder="Contoh: M 1234 AB"
                 required
@@ -57,13 +63,15 @@
 
     <div class="result
         {% if hasil.status %}
-        success
+            success
         {% else %}
-        error
+            error
         {% endif %}
     ">
 
-        <h3>{{ hasil.pesan }}</h3>
+        <h3>
+            {{ hasil.pesan }}
+        </h3>
 
 
         {% if hasil.status %}
@@ -73,25 +81,30 @@
             {{ hasil.data.id_transaksi }}
         </p>
 
+
         <p>
             <b>Nomor Plat:</b>
             {{ hasil.data.no_plat }}
         </p>
+
 
         <p>
             <b>Jenis:</b>
             {{ hasil.data.jenis }}
         </p>
 
+
         <p>
             <b>Slot:</b>
             {{ hasil.data.slot }}
         </p>
 
+
         <p>
             <b>Durasi:</b>
             {{ hasil.data.durasi }} jam
         </p>
+
 
         <div class="price">
 
