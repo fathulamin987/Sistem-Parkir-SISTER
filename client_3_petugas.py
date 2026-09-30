@@ -1,5 +1,6 @@
 from flask import Flask, render_template
-from xmlrpc.client import ServerProxy
+from xmlrpc.client import ServerProxy, Fault
+import socket
 
 
 app = Flask(__name__)
@@ -22,12 +23,18 @@ def petugas():
 
         slot = server.lihat_slot()
 
-        laporan = server.laporan()
-
         return render_template(
             "petugas.html",
             slot=slot,
-            laporan=laporan
+            error=None
+        )
+
+    except Fault as e:
+
+        return render_template(
+            "petugas.html",
+            slot={},
+            error=f"XML-RPC Error: {e}"
         )
 
     except Exception as e:
@@ -35,8 +42,7 @@ def petugas():
         return render_template(
             "petugas.html",
             slot={},
-            laporan={},
-            error=str(e)
+            error=f"Koneksi ke server gagal: {e}"
         )
 
 

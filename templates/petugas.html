@@ -37,35 +37,12 @@
         <p>{{ error }}</p>
 
         <p>
-            Server:
-            {{ "192.168.137.254:8000" }}
+            Server: {{ "192.168.137.254:8000" }}
         </p>
 
     </div>
 
-    {% else %}
-
-
-    <div class="stats">
-
-        <div class="stat-card">
-
-            <h3>Slot Terisi</h3>
-
-            <p>{{ laporan.slot_terisi }}</p>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <h3>Slot Kosong</h3>
-
-            <p>{{ laporan.slot_kosong }}</p>
-
-        </div>
-
-    </div>
+    {% endif %}
 
 
     <div class="card">
@@ -76,23 +53,23 @@
 
             {% for nomor_slot, status in slot.items() %}
 
-            <div class="slot-card
-
-                {% if status == 'KOSONG' %}
-
-                    kosong
-
-                {% else %}
-
-                    terisi
-
-                {% endif %}
-
-            ">
+            <div class="slot-card">
 
                 <h3>{{ nomor_slot }}</h3>
 
-                <p>{{ status }}</p>
+                {% if "KOSONG" in status %}
+
+                <p class="kosong">
+                    {{ status }}
+                </p>
+
+                {% else %}
+
+                <p class="terisi">
+                    {{ status }}
+                </p>
+
+                {% endif %}
 
             </div>
 
@@ -101,9 +78,6 @@
         </div>
 
     </div>
-
-
-    {% endif %}
 
 </div>
 
