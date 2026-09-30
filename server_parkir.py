@@ -1,21 +1,17 @@
 from xmlrpc.server import SimpleXMLRPCServer
 from socketserver import ThreadingMixIn
 from datetime import datetime
-import uuid
 import threading
+import uuid
 
 
-# =========================
-# KONFIGURASI SERVER
-# =========================
-
-IP_SERVER = "0.0.0.0"
-PORT_SERVER = 8000
+HOST = "0.0.0.0"
+PORT = 8000
 
 
-# =========================
+# ==============================
 # DATA PARKIR
-# =========================
+# ==============================
 
 slot_parkir = {
     "A01": None,
@@ -23,132 +19,177 @@ slot_parkir = {
     "A03": None,
     "A04": None,
     "A05": None,
+    "A06": None,
     "B01": None,
     "B02": None,
     "B03": None,
     "B04": None,
-    "B05": None
+    "B05": None,
+    "B06": None
 }
 
-
-kendaraan_parkir = {}
-riwayat_transaksi = []
+riwayat = []
 
 lock = threading.Lock()
 
 
-# =========================
-# SERVER MULTI CLIENT
-# =========================
+# ==============================
+# SERVER TEST
+# ==============================
 
-class ThreadedXMLRPCServer(
-    ThreadingMixIn,
-    SimpleXMLRPCServer
-):
-    pass
+def cek_server():
+
+    return {
+        "status": True,
+        "pesan": "Server parkir aktif"
+    }
 
 
-# =========================
+# ==============================
 # KENDARAAN MASUK
-# =========================
+# ==============================
 
 def kendaraan_masuk(no_plat, jenis):
 
     with lock:
 
-        if no_plat in kendaraan_parkir:
+        no_plat = no_plat.upper().strip()
 
-            return {
-                "status": False,
-                "pesan": "Kendaraan masih berada di dalam parkir."
-            }
+        # Cek kendaraan sudah parkir
+        for slot, data in slot_parkir.items():
 
+            if data is not None:
 
-        slot_kosong = None
+                if data["no_plat"] == no_plat:
 
-        for nomor_slot, data in slot_parkir.items():
+                    return {
+                        "status": False,
+                        "pesan": "Kendaraan tersebut masih berada di parkir."
+                    }
+
+        # Cari slot kosong
+        slot_ditemukan = None
+
+        for slot, data in slot_parkir.items():
 
             if data is None:
 
-                slot_kosong = nomor_slot
+                slot_ditemukan = slot
                 break
 
-
-        if slot_kosong is None:
+        if slot_ditemukan is None:
 
             return {
                 "status": False,
-                "pesan": "Parkiran penuh."
+                "pesan": "Parkir penuh."
             }
 
-
-        id_tiket = str(uuid.uuid4())[:8]
+        # Buat ID tiket
+        id_tiket = str(uuid.uuid4())[:8].upper()
 
         waktu_masuk = datetime.now().strftime(
-            "%Y-%m-%d %H:%M:%S"
+            "%d-%m-%Y %H:%M:%S"
         )
 
+        data_kendaraan = {
 
-        data = {
             "id_tiket": id_tiket,
+
             "no_plat": no_plat,
+
             "jenis": jenis,
-            "slot": slot_kosong,
+
+            "slot": slot_ditemukan,
+
             "waktu_masuk": waktu_masuk
         }
 
+        # Simpan ke slot
+        slot_parkir[slot_ditemukan] = data_kendaraan
 
-        slot_parkir[slot_kosong] = data
+        # Simpan riwayat
+        riwayat.append({
 
-        kendaraan_parkir[no_plat] = data
+            "id_tiket": id_tiket,
 
+            "no_plat": no_plat,
+
+            "jenis": jenis,
+
+            "slot": slot_ditemukan,
+
+            "waktu_masuk": waktu_masuk,
+
+            "waktu_keluar": None,
+
+            "durasi_jam": 0,
+
+            "total_bayar": 0
+        })
 
         return {
+
             "status": True,
+
             "pesan": "Kendaraan berhasil masuk.",
-            "data": data
+
+            "data": data_kendaraan
         }
 
 
-# =========================
+# ==============================
 # KENDARAAN KELUAR
-# =========================
+# ==============================
 
 def kendaraan_keluar(no_plat):
 
     with lock:
 
-        if no_plat not in kendaraan_parkir:
+        no_plat = no_plat.upper().strip()
+
+        data_kendaraan = None
+        slot_ditemukan = None
+
+        # Cari kendaraan
+        for slot, data in slot_parkir.items():
+
+            if data is not None:
+
+                if data["no_plat"] == no_plat:
+
+                    data_kendaraan = data
+                    slot_ditemukan = slot
+                    break
+
+        # Tidak ditemukan
+        if data_kendaraan is None:
 
             return {
+
                 "status": False,
+
                 "pesan": "Kendaraan tidak ditemukan."
             }
 
-
-        data = kendaraan_parkir[no_plat]
-
-
-        waktu_masuk = datetime.strptime(
-            data["waktu_masuk"],
-            "%Y-%m-%d %H:%M:%S"
-        )
-
         waktu_keluar = datetime.now()
 
-
-        durasi = (
-            waktu_keluar - waktu_masuk
-        ).total_seconds() / 3600
-
-
-        durasi_bayar = max(
-            1,
-            int(durasi + 0.9999)
+        waktu_masuk = datetime.strptime(
+            data_kendaraan["waktu_masuk"],
+            "%d-%m-%Y %H:%M:%S"
         )
 
+        durasi = waktu_keluar - waktu_masuk
 
-        if data["jenis"].lower() == "motor":
+        durasi_jam = int(
+            durasi.total_seconds() / 3600
+        )
+
+        if durasi_jam < 1:
+
+            durasi_jam = 1
+
+        # Tarif
+        if data_kendaraan["jenis"].lower() == "motor":
 
             tarif = 2000
 
@@ -156,59 +197,60 @@ def kendaraan_keluar(no_plat):
 
             tarif = 5000
 
+        total_bayar = durasi_jam * tarif
 
-        total_bayar = durasi_bayar * tarif
+        waktu_keluar_string = waktu_keluar.strftime(
+            "%d-%m-%Y %H:%M:%S"
+        )
 
+        # Kosongkan slot
+        slot_parkir[slot_ditemukan] = None
 
-        id_transaksi = str(
-            uuid.uuid4()
-        )[:8]
+        # Update riwayat
+        for data in riwayat:
 
+            if data["id_tiket"] == data_kendaraan["id_tiket"]:
+
+                data["waktu_keluar"] = waktu_keluar_string
+
+                data["durasi_jam"] = durasi_jam
+
+                data["total_bayar"] = total_bayar
+
+                break
 
         transaksi = {
 
-            "id_transaksi": id_transaksi,
+            "id_transaksi": str(uuid.uuid4())[:8].upper(),
 
-            "no_plat": no_plat,
+            "id_tiket": data_kendaraan["id_tiket"],
 
-            "jenis": data["jenis"],
+            "no_plat": data_kendaraan["no_plat"],
 
-            "slot": data["slot"],
+            "jenis": data_kendaraan["jenis"],
 
-            "durasi": durasi_bayar,
+            "slot": slot_ditemukan,
+
+            "durasi": durasi_jam,
 
             "total_bayar": total_bayar,
 
-            "waktu_masuk": data["waktu_masuk"],
-
-            "waktu_keluar":
-                waktu_keluar.strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                )
+            "waktu_keluar": waktu_keluar_string
         }
-
-
-        slot_parkir[data["slot"]] = None
-
-        del kendaraan_parkir[no_plat]
-
-        riwayat_transaksi.append(transaksi)
-
 
         return {
 
             "status": True,
 
-            "pesan":
-                "Kendaraan berhasil keluar.",
+            "pesan": "Kendaraan berhasil keluar.",
 
             "data": transaksi
         }
 
 
-# =========================
-# LIHAT SLOT
-# =========================
+# ==============================
+# MELIHAT KONDISI PARKIR
+# ==============================
 
 def lihat_slot():
 
@@ -216,26 +258,25 @@ def lihat_slot():
 
         hasil = {}
 
-        for nomor_slot, data in slot_parkir.items():
+        for slot, data in slot_parkir.items():
 
             if data is None:
 
-                hasil[nomor_slot] = "KOSONG"
+                hasil[slot] = "KOSONG"
 
             else:
 
-                hasil[nomor_slot] = (
+                hasil[slot] = (
                     "TERISI - "
                     + data["no_plat"]
                 )
 
-
         return hasil
 
 
-# =========================
+# ==============================
 # LAPORAN
-# =========================
+# ==============================
 
 def laporan():
 
@@ -243,91 +284,80 @@ def laporan():
 
         total_pendapatan = 0
 
-        for transaksi in riwayat_transaksi:
+        total_transaksi = 0
 
-            total_pendapatan += (
-                transaksi["total_bayar"]
-            )
+        for data in riwayat:
 
+            if data["waktu_keluar"] is not None:
 
-        jumlah_terisi = 0
+                total_transaksi += 1
+
+                total_pendapatan += data["total_bayar"]
+
+        total_slot = len(slot_parkir)
+
+        slot_terisi = 0
 
         for data in slot_parkir.values():
 
             if data is not None:
 
-                jumlah_terisi += 1
+                slot_terisi += 1
 
-
-        jumlah_kosong = (
-            len(slot_parkir)
-            - jumlah_terisi
-        )
-
+        slot_kosong = total_slot - slot_terisi
 
         return {
 
-            "total_pendapatan":
-                total_pendapatan,
+            "total_transaksi": total_transaksi,
 
-            "jumlah_kendaraan":
-                len(kendaraan_parkir),
+            "total_pendapatan": total_pendapatan,
 
-            "jumlah_transaksi":
-                len(riwayat_transaksi),
+            "kendaraan_sedang_parkir": slot_terisi,
 
-            "jumlah_slot":
-                len(slot_parkir),
+            "slot_terisi": slot_terisi,
 
-            "jumlah_terisi":
-                jumlah_terisi,
-
-            "jumlah_kosong":
-                jumlah_kosong
+            "slot_kosong": slot_kosong
         }
 
 
-# =========================
-# RIWAYAT
-# =========================
+# ==============================
+# RIWAYAT TRANSAKSI
+# ==============================
 
-def get_riwayat():
+def riwayat_transaksi():
 
     with lock:
 
-        return riwayat_transaksi[-10:]
+        return riwayat[-5:]
 
 
-# =========================
-# CEK SERVER
-# =========================
+# ==============================
+# SERVER XML-RPC
+# ==============================
 
-def cek_server():
+class ThreadedXMLRPCServer(
+    ThreadingMixIn,
+    SimpleXMLRPCServer
+):
 
-    return {
+    pass
 
-        "status": True,
-
-        "pesan":
-            "Server parkir aktif.",
-
-        "port": PORT_SERVER
-    }
-
-
-# =========================
-# BUAT SERVER
-# =========================
 
 server = ThreadedXMLRPCServer(
-    (IP_SERVER, PORT_SERVER),
+    (HOST, PORT),
     allow_none=True
 )
 
 
-# =========================
-# DAFTARKAN METHOD RPC
-# =========================
+# Aktifkan introspection
+server.register_introspection_functions()
+
+
+# Daftarkan semua method
+server.register_function(
+    cek_server,
+    "cek_server"
+)
 
 server.register_function(
     kendaraan_masuk,
@@ -350,37 +380,33 @@ server.register_function(
 )
 
 server.register_function(
-    get_riwayat,
-    "get_riwayat"
-)
-
-server.register_function(
-    cek_server,
-    "cek_server"
+    riwayat_transaksi,
+    "riwayat_transaksi"
 )
 
 
-# =========================
+# ==============================
 # JALANKAN SERVER
-# =========================
+# ==============================
 
-print()
 print("=" * 50)
-print("        SISTEM PARKIR XML-RPC")
+print("       SERVER SISTEM PARKIR")
 print("=" * 50)
-print("Server aktif")
-print("Listen    : 0.0.0.0")
+print("IP Server : 192.168.137.254")
 print("Port      : 8000")
 print()
 print("Method RPC:")
+
+print("- cek_server")
 print("- kendaraan_masuk")
 print("- kendaraan_keluar")
 print("- lihat_slot")
 print("- laporan")
-print("- get_riwayat")
-print("- cek_server")
-print("=" * 50)
+print("- riwayat_transaksi")
+
 print()
+print("Server siap menerima koneksi...")
+print("=" * 50)
 
 
 server.serve_forever()

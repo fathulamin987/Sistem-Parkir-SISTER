@@ -15,7 +15,6 @@
 
 </head>
 
-
 <body>
 
 <div class="container">
@@ -32,7 +31,6 @@
     <div class="card">
 
         <h2>Kendaraan Masuk</h2>
-
 
         <form method="POST">
 
@@ -93,9 +91,7 @@
         {% endif %}
     ">
 
-        <h3>
-            {{ hasil.pesan }}
-        </h3>
+        <h3>{{ hasil.pesan }}</h3>
 
 
         {% if hasil.status %}
@@ -105,24 +101,20 @@
             {{ hasil.data.id_tiket }}
         </p>
 
-
         <p>
             <b>Nomor Plat:</b>
             {{ hasil.data.no_plat }}
         </p>
-
 
         <p>
             <b>Jenis:</b>
             {{ hasil.data.jenis }}
         </p>
 
-
         <p>
             <b>Slot:</b>
             {{ hasil.data.slot }}
         </p>
-
 
         <p>
             <b>Waktu Masuk:</b>

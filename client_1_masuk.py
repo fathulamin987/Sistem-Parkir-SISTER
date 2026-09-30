@@ -4,6 +4,7 @@ import xmlrpc.client
 
 app = Flask(__name__)
 
+
 IP_SERVER = "192.168.137.254"
 PORT_SERVER = 8000
 
@@ -21,7 +22,8 @@ def masuk():
 
     if request.method == "POST":
 
-        no_plat = request.form["no_plat"]
+        no_plat = request.form["no_plat"].upper().strip()
+
         jenis = request.form["jenis"]
 
         try:
@@ -31,18 +33,12 @@ def masuk():
                 jenis
             )
 
-            # Memastikan nomor plat ikut ditampilkan
-            if hasil and hasil.get("status"):
-
-                if "data" not in hasil:
-                    hasil["data"] = {}
-
-                hasil["data"]["no_plat"] = no_plat
-
         except Exception as e:
 
             hasil = {
+
                 "status": False,
+
                 "pesan": "Gagal terhubung ke server: " + str(e)
             }
 

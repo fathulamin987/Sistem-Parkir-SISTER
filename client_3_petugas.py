@@ -1,12 +1,16 @@
 from flask import Flask, render_template
 from xmlrpc.client import ServerProxy
 
+
 app = Flask(__name__)
 
-IP_SERVER = "10.164.164.29"
+
+IP_SERVER = "192.168.137.254"
+PORT_SERVER = 8000
+
 
 server = ServerProxy(
-    f"http://{IP_SERVER}:8000",
+    f"http://{IP_SERVER}:{PORT_SERVER}",
     allow_none=True
 )
 
@@ -14,15 +18,30 @@ server = ServerProxy(
 @app.route("/")
 def petugas():
 
-    slot = server.lihat_slot()
+    try:
 
-    return render_template(
-        "petugas.html",
-        slot=slot
-    )
+        slot = server.lihat_slot()
+
+        laporan = server.laporan()
+
+        return render_template(
+            "petugas.html",
+            slot=slot,
+            laporan=laporan
+        )
+
+    except Exception as e:
+
+        return render_template(
+            "petugas.html",
+            slot={},
+            laporan={},
+            error=str(e)
+        )
 
 
 if __name__ == "__main__":
+
     app.run(
         host="0.0.0.0",
         port=5003,

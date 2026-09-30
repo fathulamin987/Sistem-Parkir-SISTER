@@ -2,12 +2,17 @@
 <html lang="id">
 
 <head>
+
     <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Monitoring Parkir</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
 <body>
@@ -15,9 +20,53 @@
 <div class="container wide">
 
     <div class="header">
+
         <h1>Sistem Parkir</h1>
+
         <p>Monitoring Petugas</p>
+
     </div>
+
+
+    {% if error %}
+
+    <div class="result error">
+
+        <h3>Koneksi ke Server Gagal</h3>
+
+        <p>{{ error }}</p>
+
+        <p>
+            Server:
+            {{ "192.168.137.254:8000" }}
+        </p>
+
+    </div>
+
+    {% else %}
+
+
+    <div class="stats">
+
+        <div class="stat-card">
+
+            <h3>Slot Terisi</h3>
+
+            <p>{{ laporan.slot_terisi }}</p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3>Slot Kosong</h3>
+
+            <p>{{ laporan.slot_kosong }}</p>
+
+        </div>
+
+    </div>
+
 
     <div class="card">
 
@@ -27,7 +76,19 @@
 
             {% for nomor_slot, status in slot.items() %}
 
-            <div class="slot-card">
+            <div class="slot-card
+
+                {% if status == 'KOSONG' %}
+
+                    kosong
+
+                {% else %}
+
+                    terisi
+
+                {% endif %}
+
+            ">
 
                 <h3>{{ nomor_slot }}</h3>
 
@@ -41,7 +102,11 @@
 
     </div>
 
+
+    {% endif %}
+
 </div>
 
 </body>
+
 </html>

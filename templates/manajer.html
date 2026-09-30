@@ -2,12 +2,17 @@
 <html lang="id">
 
 <head>
+
     <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Laporan Manajer</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
 <body>
@@ -23,25 +28,66 @@
     </div>
 
 
-    <div class="card">
+    {% if error %}
 
-        <h2>Laporan Parkir</h2>
+    <div class="result error">
 
-        {% for key, value in laporan.items() %}
+        <h3>Koneksi ke Server Gagal</h3>
 
-        <p>
-            <strong>{{ key }}</strong> :
-            {{ value }}
-        </p>
+        <p>{{ error }}</p>
 
-        {% endfor %}
+    </div>
+
+    {% else %}
+
+
+    <div class="stats">
+
+        <div class="stat-card">
+
+            <h3>Total Transaksi</h3>
+
+            <p>{{ laporan.total_transaksi }}</p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3>Total Pendapatan</h3>
+
+            <p>
+                Rp {{ "{:,.0f}".format(
+                    laporan.total_pendapatan
+                ).replace(",", ".") }}
+            </p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3>Slot Terisi</h3>
+
+            <p>{{ laporan.slot_terisi }}</p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3>Slot Kosong</h3>
+
+            <p>{{ laporan.slot_kosong }}</p>
+
+        </div>
 
     </div>
 
 
     <div class="card">
 
-        <h2>Riwayat Transaksi</h2>
+        <h2>5 Transaksi Terakhir</h2>
 
         {% if riwayat %}
 
@@ -50,13 +96,17 @@
             <thead>
 
                 <tr>
+
                     <th>ID Tiket</th>
                     <th>Nomor Plat</th>
                     <th>Jenis</th>
+                    <th>Durasi</th>
                     <th>Total Bayar</th>
+
                 </tr>
 
             </thead>
+
 
             <tbody>
 
@@ -69,7 +119,7 @@
                     </td>
 
                     <td>
-                        {{ data.nomor_plat }}
+                        {{ data.no_plat }}
                     </td>
 
                     <td>
@@ -77,7 +127,13 @@
                     </td>
 
                     <td>
-                        Rp {{ data.total_bayar }}
+                        {{ data.durasi_jam }} jam
+                    </td>
+
+                    <td>
+                        Rp {{ "{:,.0f}".format(
+                            data.total_bayar
+                        ).replace(",", ".") }}
                     </td>
 
                 </tr>
@@ -95,6 +151,9 @@
         {% endif %}
 
     </div>
+
+
+    {% endif %}
 
 </div>
 
